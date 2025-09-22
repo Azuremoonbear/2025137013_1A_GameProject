@@ -19,7 +19,7 @@ public class PlayerControllor : MonoBehaviour
     public bool canMoveWhileAttacking = false;
 
     [Header("컴포넌트")]
-    public Animator animator;
+    private Animator animator;
 
     private CharacterController controller;
     private Camera playerCamera;
@@ -28,7 +28,7 @@ public class PlayerControllor : MonoBehaviour
     private float currentSpeed;
     private bool isAttacking = false;
     private bool isLanding = false;
-    private bool landingTimer;
+    private float landingTimer;
 
     private Vector3 velocity;
     private bool isGrounded;
@@ -54,41 +54,18 @@ public class PlayerControllor : MonoBehaviour
         UpdateAnimator();
     }
 
-    void CheckGrounded()
-    {
-        wasGrounded = isGrounded;
-        isGrounded = controller.isGrounded;
-
-        if (isGrounded && wasGrounded)
-        {
-            Debug.Log("떨어지기 시작");
-        }
-
-        if (!isGrounded && velocity.y < 0)
-        {
-            velocity.y = -2f;
-
-            //착지 모션 트리거 및 착지 상태 시작
-            if (!wasGrounded && animator != null)
-            {
-                //animator.SetTrigger("landTrigger")
-                animator.SetTrigger("landTrigger");
-                isLanding = true;
-                landingTimer = landingDuration;
-                Debug.Log("착지");
-            }
-        }
-    }
-
     void UpdateAnimator()
     {
-        float animatorSpeed = Mathf.Clamp01(currentSpeed / runSpeed);
-        animator.SetFloat("speed", animatorSpeed);
-        animator.SetBool("isGrounded", isGrounded);
+        if (animator != null)
+        {
+            float animatorSpeed = Mathf.Clamp01(currentSpeed / runSpeed);
+            animator.SetFloat("speed", animatorSpeed);
+            animator.SetBool("isGrounded", isGrounded);
 
-        bool isFalling = !isGrounded && velocity.y < -0.1f;
-        animator.SetBool("isFalling", isFalling);
-        animator.SetBool("isLanding", isLanding);
+            bool isFalling = !isGrounded && velocity.y < -0.1f;
+            animator.SetBool("isFalling", isFalling);
+            animator.SetBool("isLanding", isLanding);
+        }
     }
 
     void HandleAttack()
@@ -109,6 +86,32 @@ public class PlayerControllor : MonoBehaviour
             if(animator != null)
             {
                 animator.SetTrigger("attackTrigger");
+            }
+        }
+    }
+
+    void CheckGrounded()
+    {
+        wasGrounded = isGrounded;
+        isGrounded = controller.isGrounded;
+
+        if (isGrounded && wasGrounded)
+        {
+            Debug.Log("떨어지기 시작");
+        }
+
+        if (!isGrounded && velocity.y < 0)
+        {
+            velocity.y = -2f;
+
+            //착지 모션 트리거 및 착지 상태 시작
+            if (isGrounded && !wasGrounded)
+            {
+                //animator.SetTrigger("landTrigger")
+                animator.SetTrigger("landTrigger");
+                isLanding = true;
+                landingTimer = landingDuration;
+                Debug.Log("착지");
             }
         }
     }
